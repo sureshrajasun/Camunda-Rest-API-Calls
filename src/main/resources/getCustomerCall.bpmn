@@ -64,7 +64,7 @@ try {
    
 
 } catch (RESTClientException e) {
-    println(e)
+    println("Exception Occured :: " + e)
     throw new org.camunda.bpm.engine.delegate.BpmnError("404Error");
 }</bpmn:script>
     </bpmn:scriptTask>
