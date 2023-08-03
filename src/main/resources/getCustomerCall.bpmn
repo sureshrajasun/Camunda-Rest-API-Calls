@@ -1,66 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1u9kquf" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="3.7.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_1u9kquf" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.10.0">
   <bpmn:process id="customerAPiCall" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1">
-      <bpmn:outgoing>Flow_039hfuy</bpmn:outgoing>
-    </bpmn:startEvent>
-    <bpmn:serviceTask id="Activity_0tuf1x4" name="Get community profil">
       <bpmn:extensionElements>
-        <camunda:connector>
-          <camunda:inputOutput>
-            <camunda:inputParameter name="method">GET</camunda:inputParameter>
-            <camunda:inputParameter name="headers">
-              <camunda:map>
-                <camunda:entry key="accept">application/json</camunda:entry>
-              </camunda:map>
-            </camunda:inputParameter>
-            <camunda:inputParameter name="url">https://api.github.com/repos/sureshrajasun/Loanprocess/community/profile</camunda:inputParameter>
-            <camunda:outputParameter name="healthPercentage">${S(response).prop("health_percentage").numberValue()}</camunda:outputParameter>
-            <camunda:outputParameter name="statusCode">#{statusCode}</camunda:outputParameter>
-          </camunda:inputOutput>
-          <camunda:connectorId>http-connector</camunda:connectorId>
-        </camunda:connector>
-        <camunda:executionListener event="end">
-          <camunda:script scriptFormat="JavaScript">if(statusCode != 200){
-throw new Error("Error from REST, response Code: " + statusCode)
-}else{
-
-}</camunda:script>
-        </camunda:executionListener>
-        <camunda:executionListener event="end">
-          <camunda:script scriptFormat="JavaScript">health = execution.getVariable("healthPercentage");
-
-if(health &lt; 70){
-
-execution.setVariable("healthPercentage", health);
-throw new org.camunda.bpm.engine.delegate.BpmnError("error-not-healthy");
-
-}else{
-execution.setVariable("healthPercentage",health);
-}</camunda:script>
-        </camunda:executionListener>
+        <camunda:formData>
+          <camunda:formField id="firstName" label="First Name" type="string" />
+          <camunda:formField id="lastName" label="Last Name" type="string" />
+          <camunda:formField id="mobile" label="Mobile Number" type="string" />
+          <camunda:formField id="loanType" label="Loan Type" type="string" />
+          <camunda:formField id="loanAmount" label="Loan Amount" type="long" />
+          <camunda:formField id="id" label="ID" type="long" />
+        </camunda:formData>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0rhg41v</bpmn:incoming>
-    </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_039hfuy" sourceRef="StartEvent_1" targetRef="Activity_1bqdec8" />
-    <bpmn:sequenceFlow id="Flow_0rhg41v" sourceRef="Activity_1bqdec8" targetRef="Activity_0tuf1x4" />
-    <bpmn:scriptTask id="Activity_1bqdec8" name="Getgitlabcall" scriptFormat="groovy">
-      <bpmn:incoming>Flow_039hfuy</bpmn:incoming>
-      <bpmn:outgoing>Flow_0rhg41v</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0a2tpg4</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:scriptTask id="Activity_1bqdec8" name="getCustomer" scriptFormat="groovy">
+      <bpmn:incoming>Flow_0a2tpg4</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ttfevd</bpmn:outgoing>
       <bpmn:script>import wslite.rest.RESTClient
 import wslite.rest.RESTClientException
 
-def repoOwner = "sureshrajasun"
-def repoName = "Loanprocess"
+def firstName = execution.getVariable("firstName")
+def lastName = execution.getVariable("lastName")
+def mobile = execution.getVariable("mobile")
+def id = execution.getVariable("id")
 
-def country = false
+def isValidUser = false
 
-
-def programingLanguages
 
 
 RESTClient client = new RESTClient("http://localhost:8080")
-def path = "/customer/111"
+def path = "/customer/"+id
 def response
 
 
@@ -71,61 +41,154 @@ try {
     println(response.contentAsString)
 
 
-    if(response.contentAsString.contains("country")){
-        country = true;
+    if(response.contentAsString.contains(firstName)){
+        isValidUser = true;
+       
+    }
+
+     if(isValidUser &amp;&amp; response.contentAsString.contains(lastName)){
+        isValidUser = true;
+       
+    }
+
+     if(isValidUser &amp;&amp; response.contentAsString.contains(mobile)){
+        isValidUser = true;
        
     }
    
+
+    println(isValidUser)
+    
     //return variables
-    execution.setVariable("country", country)
+    execution.setVariable("isValidUser", isValidUser)
    
 
 } catch (RESTClientException e) {
     println(e)
-    throw new Exception(e)
+    throw new org.camunda.bpm.engine.delegate.BpmnError("404Error");
 }</bpmn:script>
     </bpmn:scriptTask>
-    <bpmn:textAnnotation id="TextAnnotation_1iom4vi">
-      <bpmn:text>HTTP Connector</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="Association_1qof73e" sourceRef="Activity_0tuf1x4" targetRef="TextAnnotation_1iom4vi" />
+    <bpmn:sequenceFlow id="Flow_0a2tpg4" sourceRef="StartEvent_1" targetRef="Activity_1bqdec8" />
+    <bpmn:exclusiveGateway id="Gateway_0etx3x6">
+      <bpmn:incoming>Flow_1ttfevd</bpmn:incoming>
+      <bpmn:outgoing>Flow_12j4zri</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1qwjzvg</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1ttfevd" sourceRef="Activity_1bqdec8" targetRef="Gateway_0etx3x6" />
+    <bpmn:sequenceFlow id="Flow_12j4zri" sourceRef="Gateway_0etx3x6" targetRef="validUser">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isValidUser==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:scriptTask id="validUser" name="Valid User" scriptFormat="groovy">
+      <bpmn:incoming>Flow_12j4zri</bpmn:incoming>
+      <bpmn:outgoing>Flow_0lcyjuj</bpmn:outgoing>
+      <bpmn:script>println( "valid user")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="Flow_1qwjzvg" sourceRef="Gateway_0etx3x6" targetRef="invalidUser">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isValidUser==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:scriptTask id="invalidUser" name="Invalid User" scriptFormat="groovy">
+      <bpmn:incoming>Flow_1qwjzvg</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ayc3oc</bpmn:outgoing>
+      <bpmn:script>println("Invalid User")</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:endEvent id="Event_1iop6qb">
+      <bpmn:incoming>Flow_0lcyjuj</bpmn:incoming>
+      <bpmn:incoming>Flow_0ayc3oc</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0lcyjuj" sourceRef="validUser" targetRef="Event_1iop6qb" />
+    <bpmn:sequenceFlow id="Flow_0ayc3oc" sourceRef="invalidUser" targetRef="Event_1iop6qb" />
+    <bpmn:boundaryEvent id="Event_1ctj4f6" attachedToRef="Activity_1bqdec8">
+      <bpmn:outgoing>Flow_1noskwb</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_09b6o98" errorRef="Error_119ygkm" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1noskwb" sourceRef="Event_1ctj4f6" targetRef="Activity_13t4yl4" />
+    <bpmn:endEvent id="Event_12tcj00">
+      <bpmn:incoming>Flow_1agy3v9</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1agy3v9" sourceRef="Activity_13t4yl4" targetRef="Event_12tcj00" />
+    <bpmn:userTask id="Activity_13t4yl4" name="Exception">
+      <bpmn:incoming>Flow_1noskwb</bpmn:incoming>
+      <bpmn:outgoing>Flow_1agy3v9</bpmn:outgoing>
+    </bpmn:userTask>
     <bpmn:textAnnotation id="TextAnnotation_0plg1wt">
       <bpmn:text>script task</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_1re1b28" sourceRef="Activity_1bqdec8" targetRef="TextAnnotation_0plg1wt" />
   </bpmn:process>
+  <bpmn:error id="Error_02dvazz" name="Error_11qmvq2" />
+  <bpmn:error id="Error_119ygkm" name="404Error" errorCode="404Error" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="customerAPiCall">
-      <bpmndi:BPMNEdge id="Flow_0rhg41v_di" bpmnElement="Flow_0rhg41v">
-        <di:waypoint x="390" y="230" />
-        <di:waypoint x="510" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_039hfuy_di" bpmnElement="Flow_039hfuy">
-        <di:waypoint x="198" y="230" />
-        <di:waypoint x="290" y="230" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="162" y="212" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_17hx8ao_di" bpmnElement="Activity_0tuf1x4">
-        <dc:Bounds x="510" y="190" width="100" height="80" />
+        <dc:Bounds x="152" y="192" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_18xrpwu_di" bpmnElement="Activity_1bqdec8">
-        <dc:Bounds x="290" y="190" width="100" height="80" />
+        <dc:Bounds x="340" y="170" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1iom4vi_di" bpmnElement="TextAnnotation_1iom4vi">
-        <dc:Bounds x="510" y="80" width="100" height="39" />
+      <bpmndi:BPMNShape id="Gateway_0etx3x6_di" bpmnElement="Gateway_0etx3x6" isMarkerVisible="true">
+        <dc:Bounds x="545" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_18ghtq8_di" bpmnElement="validUser">
+        <dc:Bounds x="710" y="170" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0g4md0i_di" bpmnElement="invalidUser">
+        <dc:Bounds x="720" y="270" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1iop6qb_di" bpmnElement="Event_1iop6qb">
+        <dc:Bounds x="932" y="192" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0plg1wt_di" bpmnElement="TextAnnotation_0plg1wt">
-        <dc:Bounds x="290" y="110" width="100" height="30" />
+        <dc:Bounds x="340" y="70" width="100" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_1qof73e_di" bpmnElement="Association_1qof73e">
-        <di:waypoint x="560" y="190" />
-        <di:waypoint x="560" y="119" />
+      <bpmndi:BPMNShape id="Event_12tcj00_di" bpmnElement="Event_12tcj00">
+        <dc:Bounds x="612" y="362" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_047zltl_di" bpmnElement="Activity_13t4yl4">
+        <dc:Bounds x="450" y="340" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ulqhni_di" bpmnElement="Event_1ctj4f6">
+        <dc:Bounds x="362" y="232" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0a2tpg4_di" bpmnElement="Flow_0a2tpg4">
+        <di:waypoint x="188" y="210" />
+        <di:waypoint x="340" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ttfevd_di" bpmnElement="Flow_1ttfevd">
+        <di:waypoint x="440" y="210" />
+        <di:waypoint x="545" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12j4zri_di" bpmnElement="Flow_12j4zri">
+        <di:waypoint x="595" y="210" />
+        <di:waypoint x="710" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1qwjzvg_di" bpmnElement="Flow_1qwjzvg">
+        <di:waypoint x="570" y="235" />
+        <di:waypoint x="570" y="310" />
+        <di:waypoint x="720" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0lcyjuj_di" bpmnElement="Flow_0lcyjuj">
+        <di:waypoint x="810" y="210" />
+        <di:waypoint x="932" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ayc3oc_di" bpmnElement="Flow_0ayc3oc">
+        <di:waypoint x="820" y="310" />
+        <di:waypoint x="876" y="310" />
+        <di:waypoint x="876" y="210" />
+        <di:waypoint x="932" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1re1b28_di" bpmnElement="Association_1re1b28">
-        <di:waypoint x="340" y="190" />
-        <di:waypoint x="340" y="140" />
+        <di:waypoint x="390" y="170" />
+        <di:waypoint x="390" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1noskwb_di" bpmnElement="Flow_1noskwb">
+        <di:waypoint x="380" y="268" />
+        <di:waypoint x="380" y="380" />
+        <di:waypoint x="450" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1agy3v9_di" bpmnElement="Flow_1agy3v9">
+        <di:waypoint x="550" y="380" />
+        <di:waypoint x="612" y="380" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
