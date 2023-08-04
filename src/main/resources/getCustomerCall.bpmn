@@ -27,52 +27,40 @@ def id = execution.getVariable("id")
 
 def isValidUser = false
 
-
-
 RESTClient client = new RESTClient("http://localhost:8080")
 def path = "/customer/"+id
 def response
-
-
 
 try {
     println(path)
     response = client.get(path: path)
     println(response.contentAsString)
-
-
-
-
-def slurper = new groovy.json.JsonSlurper()
- def result = slurper.parseText(response.contentAsString)
-println("First Name :" + result.firstName)
-println("User Id :" + result.id)
-
-execution.setVariable("userId", result.id)
-
-
+    
     if(response.contentAsString.contains(firstName)){
         isValidUser = true;
-       
     }
 
-     if(isValidUser &amp;&amp; response.contentAsString.contains(lastName)){
+    if(isValidUser &amp;&amp; response.contentAsString.contains(lastName)){
         isValidUser = true;
-       
     }
 
-     if(isValidUser &amp;&amp; response.contentAsString.contains(mobile)){
+    if(isValidUser &amp;&amp; response.contentAsString.contains(mobile)){
         isValidUser = true;
-       
     }
-   
-
-    println(isValidUser)
     
+    println("IS Valid User : " + isValidUser)
+
+    if(isValidUser){
+        def slurper = new groovy.json.JsonSlurper()
+        def result = slurper.parseText(response.contentAsString)
+        println("First Name :" + result.firstName)
+        println("User Id :" + result.id)
+        execution.setVariable("userId", result.id)
+    }
+
     //return variables
     execution.setVariable("isValidUser", isValidUser)
-   
-
+    
 } catch (RESTClientException e) {
     println("Exception Occured :: " + e)
     throw new org.camunda.bpm.engine.delegate.BpmnError("404Error");
