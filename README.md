@@ -4,7 +4,7 @@
 # Camunda Call External API to validate the User
 
 
-![img.png](img/img.png)!
+![img.png](img.png)
 
 >Groovy Script to fetch the user from external API and throw exception incase of error
 
