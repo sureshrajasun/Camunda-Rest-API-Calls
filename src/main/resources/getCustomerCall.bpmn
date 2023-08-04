@@ -92,11 +92,10 @@ try {
       <bpmn:script>println("Invalid User")</bpmn:script>
     </bpmn:scriptTask>
     <bpmn:endEvent id="Event_1iop6qb">
-      <bpmn:incoming>Flow_0lcyjuj</bpmn:incoming>
-      <bpmn:incoming>Flow_0ayc3oc</bpmn:incoming>
+      <bpmn:incoming>Flow_0e3zfmx</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0lcyjuj" sourceRef="validUser" targetRef="Event_1iop6qb" />
-    <bpmn:sequenceFlow id="Flow_0ayc3oc" sourceRef="invalidUser" targetRef="Event_1iop6qb" />
+    <bpmn:sequenceFlow id="Flow_0lcyjuj" sourceRef="validUser" targetRef="Activity_1mgh60r" />
+    <bpmn:sequenceFlow id="Flow_0ayc3oc" sourceRef="invalidUser" targetRef="Activity_1mgh60r" />
     <bpmn:boundaryEvent id="Event_1ctj4f6" attachedToRef="Activity_1bqdec8">
       <bpmn:outgoing>Flow_1noskwb</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_09b6o98" errorRef="Error_119ygkm" />
@@ -109,6 +108,41 @@ try {
     <bpmn:userTask id="Activity_13t4yl4" name="Exception">
       <bpmn:incoming>Flow_1noskwb</bpmn:incoming>
       <bpmn:outgoing>Flow_1agy3v9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1pfc8cq" sourceRef="Activity_1mgh60r" targetRef="Gateway_1jh3d45" />
+    <bpmn:serviceTask id="Activity_1mgh60r" name="Update Loan">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="url">http://localhost:8080/loan/111/2000/HL</camunda:inputParameter>
+            <camunda:inputParameter name="headers">
+              <camunda:map>
+                <camunda:entry key="accept">application/json</camunda:entry>
+              </camunda:map>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="method">POST</camunda:inputParameter>
+            <camunda:outputParameter name="statusCode">#{statusCode}</camunda:outputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>http-connector</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0lcyjuj</bpmn:incoming>
+      <bpmn:incoming>Flow_0ayc3oc</bpmn:incoming>
+      <bpmn:outgoing>Flow_1pfc8cq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_1jh3d45">
+      <bpmn:incoming>Flow_1pfc8cq</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e3zfmx</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0gake13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0e3zfmx" sourceRef="Gateway_1jh3d45" targetRef="Event_1iop6qb">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode=="200"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0gake13" sourceRef="Gateway_1jh3d45" targetRef="Activity_11bmr46">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${statusCode!="200"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Activity_11bmr46" name="Exception">
+      <bpmn:incoming>Flow_0gake13</bpmn:incoming>
     </bpmn:userTask>
     <bpmn:textAnnotation id="TextAnnotation_0plg1wt">
       <bpmn:text>script task</bpmn:text>
@@ -132,13 +166,10 @@ try {
         <dc:Bounds x="710" y="170" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0g4md0i_di" bpmnElement="invalidUser">
-        <dc:Bounds x="720" y="270" width="100" height="80" />
+        <dc:Bounds x="710" y="270" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1iop6qb_di" bpmnElement="Event_1iop6qb">
-        <dc:Bounds x="932" y="192" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0plg1wt_di" bpmnElement="TextAnnotation_0plg1wt">
-        <dc:Bounds x="340" y="70" width="100" height="30" />
+        <dc:Bounds x="1192" y="192" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_12tcj00_di" bpmnElement="Event_12tcj00">
         <dc:Bounds x="612" y="362" width="36" height="36" />
@@ -146,6 +177,19 @@ try {
       <bpmndi:BPMNShape id="Activity_047zltl_di" bpmnElement="Activity_13t4yl4">
         <dc:Bounds x="450" y="340" width="100" height="80" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ry1vwi_di" bpmnElement="Activity_1mgh60r">
+        <dc:Bounds x="970" y="170" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0plg1wt_di" bpmnElement="TextAnnotation_0plg1wt">
+        <dc:Bounds x="340" y="70" width="100" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1jh3d45_di" bpmnElement="Gateway_1jh3d45" isMarkerVisible="true">
+        <dc:Bounds x="1115" y="185" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jw7xef_di" bpmnElement="Activity_11bmr46">
+        <dc:Bounds x="1200" y="280" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_1ulqhni_di" bpmnElement="Event_1ctj4f6">
         <dc:Bounds x="362" y="232" width="36" height="36" />
@@ -165,21 +209,16 @@ try {
       <bpmndi:BPMNEdge id="Flow_1qwjzvg_di" bpmnElement="Flow_1qwjzvg">
         <di:waypoint x="570" y="235" />
         <di:waypoint x="570" y="310" />
-        <di:waypoint x="720" y="310" />
+        <di:waypoint x="710" y="310" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0lcyjuj_di" bpmnElement="Flow_0lcyjuj">
         <di:waypoint x="810" y="210" />
-        <di:waypoint x="932" y="210" />
+        <di:waypoint x="970" y="210" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0ayc3oc_di" bpmnElement="Flow_0ayc3oc">
-        <di:waypoint x="820" y="310" />
-        <di:waypoint x="876" y="310" />
-        <di:waypoint x="876" y="210" />
-        <di:waypoint x="932" y="210" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1re1b28_di" bpmnElement="Association_1re1b28">
-        <di:waypoint x="390" y="170" />
-        <di:waypoint x="390" y="100" />
+        <di:waypoint x="810" y="310" />
+        <di:waypoint x="1050" y="310" />
+        <di:waypoint x="1050" y="250" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1noskwb_di" bpmnElement="Flow_1noskwb">
         <di:waypoint x="380" y="268" />
@@ -189,6 +228,23 @@ try {
       <bpmndi:BPMNEdge id="Flow_1agy3v9_di" bpmnElement="Flow_1agy3v9">
         <di:waypoint x="550" y="380" />
         <di:waypoint x="612" y="380" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1pfc8cq_di" bpmnElement="Flow_1pfc8cq">
+        <di:waypoint x="1070" y="210" />
+        <di:waypoint x="1115" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1re1b28_di" bpmnElement="Association_1re1b28">
+        <di:waypoint x="390" y="170" />
+        <di:waypoint x="390" y="100" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e3zfmx_di" bpmnElement="Flow_0e3zfmx">
+        <di:waypoint x="1165" y="210" />
+        <di:waypoint x="1192" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gake13_di" bpmnElement="Flow_0gake13">
+        <di:waypoint x="1140" y="235" />
+        <di:waypoint x="1140" y="320" />
+        <di:waypoint x="1200" y="320" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
