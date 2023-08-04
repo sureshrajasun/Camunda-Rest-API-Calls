@@ -41,6 +41,16 @@ try {
     println(response.contentAsString)
 
 
+
+
+def slurper = new groovy.json.JsonSlurper()
+ def result = slurper.parseText(response.contentAsString)
+println("First Name :" + result.firstName)
+println("User Id :" + result.id)
+
+execution.setVariable("userId", result.id)
+
+
     if(response.contentAsString.contains(firstName)){
         isValidUser = true;
        
@@ -115,7 +125,7 @@ try {
       <bpmn:extensionElements>
         <camunda:connector>
           <camunda:inputOutput>
-            <camunda:inputParameter name="url">http://localhost:8080/loan/111/2000/HL</camunda:inputParameter>
+            <camunda:inputParameter name="url">http://localhost:8080/loan/${userId}/${loanAmount}/${loanType}</camunda:inputParameter>
             <camunda:inputParameter name="headers">
               <camunda:map>
                 <camunda:entry key="accept">application/json</camunda:entry>
