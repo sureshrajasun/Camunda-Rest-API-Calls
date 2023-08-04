@@ -7,8 +7,8 @@ camunda.bpm.admin-user:
   
 logging:
   level:
-    '[org.camunda.bpm.connect]': DEBUG
-    '[org.apache.http.headers]': DEBUG
-    '[org.apache.http.wire]': DEBUG
-    '[connectjar.org.apache.http.headers]': DEBUG
-    '[connectjar.org.apache.http.wire]': DEBUG 
+    '[org.camunda.bpm.connect]': INFO
+    '[org.apache.http.headers]': INFO
+    '[org.apache.http.wire]': INFO
+    '[connectjar.org.apache.http.headers]': INFO
+    '[connectjar.org.apache.http.wire]': INFO
