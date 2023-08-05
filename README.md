@@ -60,3 +60,42 @@ try {
     throw new org.camunda.bpm.engine.delegate.BpmnError("404Error");
 }
 ```
+
+CURL Command to call the BPMN flow
+ 
+- Note: replace the process_definition_id in the request
+
+```shell
+curl --location 'http://localhost:9090/engine-rest/process-definition/customerAPiCall:3:d3a74bd8-32c0-11ee-ac4a-8ac983091590/start' \
+--header 'Content-Type: application/json' \
+--data '{
+    "variables": {
+        "firstName": {
+            "value": "Alvira",
+            "type": "String"
+        },
+        "lastName": {
+            "value": "Culley",
+            "type": "String"
+        },
+        "mobile": {
+            "value": "+86 (484) 323-3861",
+            "type": "String"
+        },
+        "loanType": {
+            "value": "HL",
+            "type": "String"
+        },
+        "loanAmount": {
+            "value": 20000,
+            "type": "Long"
+        },
+        "id": {
+            "value": 111,
+            "type": "Long"
+        }
+    },
+    "businessKey": "Doom1",
+    "withVariablesInReturn": true
+}'
+```
